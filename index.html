@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>claude-icq-hook — ICQ "Uh Oh!" for Claude Code</title>
+  <meta name="description" content="Plays the classic ICQ 'Uh Oh!' sound after every Claude Code response. One command install." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --border: rgba(255,255,255,0.08);
+      --green: #00c951;
+      --green-dim: rgba(0,201,81,0.12);
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.45);
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px;
+      overflow-x: hidden;
+    }
+
+    /* glow blob */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(ellipse, rgba(0,201,81,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    nav .logo {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    nav a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    nav a:hover { color: var(--white); }
+
+    main {
+      width: 100%;
+      max-width: 720px;
+      text-align: center;
+      padding: 80px 0 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-dim);
+      border: 1px solid rgba(0,201,81,0.25);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+    }
+
+    .badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    h1 {
+      font-size: clamp(42px, 8vw, 68px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--green) 0%, #00e676 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0 auto 48px;
+    }
+
+    /* Play button */
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 100px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-bottom: 52px;
+      box-shadow: 0 0 0 0 rgba(0,201,81,0.4);
+    }
+
+    .play-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 30px rgba(0,201,81,0.3);
+    }
+
+    .play-btn:active { transform: scale(0.98); }
+
+    .play-btn svg { flex-shrink: 0; }
+
+    /* Install box */
+    .install-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 80px;
+      text-align: left;
+    }
+
+    .install-box code {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 15px;
+      color: var(--white);
+      user-select: all;
+    }
+
+    .install-box code span { color: var(--green); }
+
+    .copy-btn {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+    .copy-btn.copied { color: var(--green); border-color: rgba(0,201,81,0.3); }
+
+    /* Steps */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 80px;
+      text-align: left;
+    }
+
+    @media (max-width: 560px) {
+      .steps { grid-template-columns: 1fr; }
+    }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .step h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    footer {
+      width: 100%;
+      max-width: 720px;
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    footer a:hover { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">claude-icq-hook</span>
+  <a href="https://www.npmjs.com/package/claude-icq-hook" target="_blank">npm ↗</a>
+</nav>
+
+<main>
+  <div class="badge">v1.0.0 · just published</div>
+
+  <h1>The sound you<br/>never <span>forgot.</span></h1>
+
+  <p class="subtitle">
+    Plays the classic ICQ "Uh Oh!" after every Claude Code response.
+    One command. Pure nostalgia.
+  </p>
+
+  <button class="play-btn" onclick="playSound()">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M5 3.5L14.5 9 5 14.5V3.5Z" fill="black"/>
+    </svg>
+    Hear it
+  </button>
+
+  <div class="install-box">
+    <code><span>npx</span> claude-icq-hook</code>
+    <button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">Step 01</div>
+      <h3>Run the command</h3>
+      <p>One <code style="font-size:12px;color:var(--green)">npx</code> command copies the sound and sets up the hook.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 02</div>
+      <h3>Restart Claude Code</h3>
+      <p>The hook gets added to <code style="font-size:12px;color:var(--green)">~/.claude/settings.json</code> automatically.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 03</div>
+      <h3>Feel 1996 again</h3>
+      <p>Every time Claude finishes a response — <em>Uh Oh!</em></p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>MIT License · macOS & Linux</span>
+  <a href="https://www.npmjs.com/package/claude-icq-hook" target="_blank">npmjs.com/package/claude-icq-hook</a>
+</footer>
+
+<audio id="icq-sound" src="https://cdn.jsdelivr.net/npm/claude-icq-hook@1.0.0/sounds/icq-uh-oh.mp3" preload="auto"></audio>
+
+<script>
+  function playSound() {
+    const audio = document.getElementById("icq-sound");
+    audio.currentTime = 0;
+    audio.play();
+  }
+
+  function copyCmd(btn) {
+    navigator.clipboard.writeText("npx claude-icq-hook").then(() => {
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "Copy";
+        btn.classList.remove("copied");
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>

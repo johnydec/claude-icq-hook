@@ -1,0 +1,25 @@
+{
+  "name": "claude-icq-hook",
+  "version": "1.0.0",
+  "description": "Plays the classic ICQ 'Uh Oh!' sound after every Claude Code response",
+  "bin": {
+    "claude-icq-hook": "./install.js"
+  },
+  "files": [
+    "install.js",
+    "sounds/"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "hook",
+    "icq",
+    "notification",
+    "sound"
+  ],
+  "author": "johny_dec",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  }
+}
