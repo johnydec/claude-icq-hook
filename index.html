@@ -242,6 +242,127 @@
       line-height: 1.5;
     }
 
+    /* Buy me a coffee */
+    .bmc-section {
+      width: 100%;
+      max-width: 720px;
+      text-align: center;
+      padding: 0 0 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bmc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 14px 32px;
+      text-decoration: none;
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 600;
+      position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      overflow: visible;
+    }
+
+    /* shimmer sweep - contained in pseudo on inner wrapper */
+    .bmc-shimmer {
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bmc-shimmer::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        105deg,
+        transparent 20%,
+        rgba(0,201,81,0.08) 40%,
+        rgba(0,201,81,0.18) 50%,
+        rgba(0,201,81,0.08) 60%,
+        transparent 80%
+      );
+      animation: shimmer 3.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { left: -100%; }
+      40%  { left: 120%; }
+      100% { left: 120%; }
+    }
+
+    .bmc-link:hover {
+      border-color: rgba(0,201,81,0.4);
+      box-shadow: 0 0 30px rgba(0,201,81,0.15);
+    }
+
+    .bmc-icon {
+      position: relative;
+      font-size: 20px;
+      line-height: 1;
+      z-index: 1;
+    }
+
+    .bmc-text {
+      color: var(--muted);
+      transition: color 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bmc-link:hover .bmc-text {
+      color: var(--white);
+    }
+
+    /* floating coffees on hover */
+    .bmc-coffees {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .bmc-coffees span {
+      position: absolute;
+      font-size: 18px;
+      opacity: 0;
+      transition: none;
+    }
+
+    .bmc-link:hover .bmc-coffees span {
+      animation: coffee-float 2.5s ease-out infinite;
+    }
+
+    .bmc-coffees span:nth-child(1) { left: 5%; }
+    .bmc-coffees span:nth-child(2) { left: 25%; }
+    .bmc-coffees span:nth-child(3) { left: 48%; }
+    .bmc-coffees span:nth-child(4) { left: 72%; }
+    .bmc-coffees span:nth-child(5) { left: 90%; }
+
+    .bmc-link:hover .bmc-coffees span:nth-child(1) { animation-delay: 0s; }
+    .bmc-link:hover .bmc-coffees span:nth-child(2) { animation-delay: 0.4s; }
+    .bmc-link:hover .bmc-coffees span:nth-child(3) { animation-delay: 0.8s; }
+    .bmc-link:hover .bmc-coffees span:nth-child(4) { animation-delay: 0.2s; }
+    .bmc-link:hover .bmc-coffees span:nth-child(5) { animation-delay: 0.6s; }
+
+    @keyframes coffee-float {
+      0%   { bottom: 0; opacity: 0; transform: scale(0.4) rotate(0deg); }
+      15%  { opacity: 1; transform: scale(1) rotate(-10deg); }
+      50%  { opacity: 0.7; transform: scale(0.85) rotate(15deg); }
+      100% { bottom: 200%; opacity: 0; transform: scale(0.5) rotate(-5deg); }
+    }
+
     /* Footer */
     footer {
       width: 100%;
@@ -312,6 +433,17 @@
     </div>
   </div>
 </main>
+
+<div class="bmc-section">
+  <a href="https://buymeacoffee.com/evensee" target="_blank" class="bmc-link">
+    <span class="bmc-shimmer"></span>
+    <span class="bmc-icon">☕</span>
+    <span class="bmc-text">Buy me a coffee</span>
+    <span class="bmc-coffees">
+      <span>☕</span><span>☕</span><span>☕</span><span>☕</span><span>☕</span>
+    </span>
+  </a>
+</div>
 
 <footer>
   <span>MIT License · macOS & Linux</span>
